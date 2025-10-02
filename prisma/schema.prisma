@@ -9,19 +9,19 @@ datasource db {
 
 model Patient {
   id        String   @id @default(cuid())
-  name      String
-  dateOfBirth DateTime
-  phone     String?
+  fullName  String
+  dob       DateTime
   email     String?
+  phone     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   orders    Order[]
   
-  @@index([name])
+  @@index([fullName])
 }
 
-model Test {
+model LabTest {
   id          String   @id @default(cuid())
   code        String   @unique
   name        String
@@ -66,14 +66,14 @@ model Order {
 model OrderItem {
   id                      String   @id @default(cuid())
   orderId                 String
-  testId                  String
+  labTestId               String
   unitPriceCents          Int
   turnaroundDaysAtOrder   Int
   createdAt               DateTime @default(now())
   
   order                   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  test                    Test     @relation(fields: [testId], references: [id])
+  labTest                 LabTest  @relation(fields: [labTestId], references: [id])
   
   @@index([orderId])
-  @@index([testId])
+  @@index([labTestId])
 }

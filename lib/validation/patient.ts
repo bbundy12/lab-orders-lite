@@ -1,12 +1,12 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const patientSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
-  dateOfBirth: z.string().refine((val) => !isNaN(Date.parse(val)), {
+  fullName: z.string().min(1, "Full name is required").max(100),
+  dob: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Invalid date format",
   }),
-  phone: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
-})
+  phone: z.string().optional(),
+});
 
-export type PatientInput = z.infer<typeof patientSchema>
+export type PatientInput = z.infer<typeof patientSchema>;

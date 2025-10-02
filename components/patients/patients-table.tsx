@@ -1,36 +1,23 @@
-"use client"
+"use client";
 
-import { useQuery } from "@tanstack/react-query"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import { formatDate } from "@/lib/date"
-import { Search } from "lucide-react"
-
-interface Patient {
-  id: string
-  name: string
-  dateOfBirth: string
-  phone: string | null
-  email: string | null
-  createdAt: string
-}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { formatDate } from "@/lib/date";
+import { Search } from "lucide-react";
+import { usePatients } from "@/hooks/use-patients";
 
 export function PatientsTable() {
-  const [search, setSearch] = useState("")
-
-  const { data: patients = [], isLoading } = useQuery<Patient[]>({
-    queryKey: ["patients", search],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (search) params.set("search", search)
-
-      const response = await fetch(`/api/patients?${params}`)
-      if (!response.ok) throw new Error("Failed to fetch patients")
-      return response.json()
-    },
-  })
+  const [search, setSearch] = useState("");
+  const { data: patients = [], isLoading } = usePatients(search);
 
   return (
     <Card className="rounded-3xl shadow-lg">
@@ -52,7 +39,9 @@ export function PatientsTable() {
           <div className="text-center py-8 text-muted-foreground">Loading patients...</div>
         ) : patients.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {search ? "No patients found matching your search" : "No patients yet. Add your first patient above."}
+            {search
+              ? "No patients found matching your search"
+              : "No patients yet. Add your first patient above."}
           </div>
         ) : (
           <div className="rounded-xl border overflow-hidden">
@@ -69,11 +58,13 @@ export function PatientsTable() {
               <TableBody>
                 {patients.map((patient) => (
                   <TableRow key={patient.id}>
-                    <TableCell className="font-medium">{patient.name}</TableCell>
-                    <TableCell>{formatDate(patient.dateOfBirth)}</TableCell>
+                    <TableCell className="font-medium">{patient.fullName}</TableCell>
+                    <TableCell>{formatDate(patient.dob)}</TableCell>
                     <TableCell>{patient.phone || "—"}</TableCell>
                     <TableCell>{patient.email || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(patient.createdAt)}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(patient.createdAt)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -82,5 +73,5 @@ export function PatientsTable() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,36 +1,33 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { ZodError, z } from "zod"
+import { type NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { ZodError, z } from "zod";
+import { validationErrorResponse, serverErrorResponse } from "@/lib/http";
 
-const updateTestSchema = z.object({
-  isActive: z.boolean(),
-})
+const updateLabTestSchema = z.object({
+  code: z.string().min(1).max(20).optional(),
+  name: z.string().min(1).max(200).optional(),
+  priceCents: z.number().int().min(0).optional(),
+  turnaroundDays: z.number().int().min(1).optional(),
+  isActive: z.boolean().optional(),
+});
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params
-    const body = await request.json()
-    const validated = updateTestSchema.parse(body)
+    const { id } = await params;
+    const body = await request.json();
+    const validated = updateLabTestSchema.parse(body);
 
-    const test = await prisma.test.update({
+    const labTest = await prisma.labTest.update({
       where: { id },
-      data: { isActive: validated.isActive },
-    })
+      data: validated,
+    });
 
-    return NextResponse.json(test)
+    return NextResponse.json(labTest);
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          errors: error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
-        },
-        { status: 400 },
-      )
+      return validationErrorResponse(error);
     }
-    console.error("[v0] Error updating test:", error)
-    return NextResponse.json({ error: "Failed to update test" }, { status: 500 })
+    console.error("[v0] Error updating lab test:", error);
+    return serverErrorResponse("Failed to update lab test");
   }
 }

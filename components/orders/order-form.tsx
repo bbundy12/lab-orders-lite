@@ -1,120 +1,67 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { formatDate } from "@/lib/date"
-import { calcTotal, calcEta } from "@/lib/calculations"
-
-interface Patient {
-  id: string
-  name: string
-}
-
-interface Test {
-  id: string
-  code: string
-  name: string
-  priceCents: number
-  turnaroundDays: number
-  isActive: boolean
-}
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { formatDate } from "@/lib/date";
+import { calcTotal, calcEta, formatMoney } from "@/lib/calculations";
+import { usePatients } from "@/hooks/use-patients";
+import { useLabTests } from "@/hooks/use-tests";
+import { useCreateOrder } from "@/hooks/use-orders";
 
 export function OrderForm() {
-  const [selectedPatientId, setSelectedPatientId] = useState("")
-  const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set())
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const router = useRouter()
+  const [selectedPatientId, setSelectedPatientId] = useState("");
+  const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set());
 
-  const { data: patients = [] } = useQuery<Patient[]>({
-    queryKey: ["patients"],
-    queryFn: async () => {
-      const response = await fetch("/api/patients")
-      if (!response.ok) throw new Error("Failed to fetch patients")
-      return response.json()
-    },
-  })
+  const { toast } = useToast();
+  const router = useRouter();
 
-  const { data: tests = [] } = useQuery<Test[]>({
-    queryKey: ["tests", "active"],
-    queryFn: async () => {
-      const response = await fetch("/api/tests?activeOnly=1")
-      if (!response.ok) throw new Error("Failed to fetch tests")
-      return response.json()
-    },
-  })
-
-  const createOrder = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to create order")
-      }
-
-      return response.json()
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] })
-      toast({
-        title: "Success",
-        description: "Order created successfully",
-      })
-      router.push(`/orders/${data.id}`)
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      })
-    },
-  })
+  const { data: patients = [] } = usePatients();
+  const { data: tests = [] } = useLabTests(true); // activeOnly = true
+  const createOrderMutation = useCreateOrder();
 
   const handleTestToggle = (testId: string) => {
-    const newSelected = new Set(selectedTests)
+    const newSelected = new Set(selectedTests);
     if (newSelected.has(testId)) {
-      newSelected.delete(testId)
+      newSelected.delete(testId);
     } else {
-      newSelected.add(testId)
+      newSelected.add(testId);
     }
-    setSelectedTests(newSelected)
-  }
+    setSelectedTests(newSelected);
+  };
 
-  const selectedTestsData = tests.filter((test) => selectedTests.has(test.id))
+  const selectedTestsData = tests.filter((test) => selectedTests.has(test.id));
   const orderItems = selectedTestsData.map((test) => ({
-    testId: test.id,
+    labTestId: test.id,
     unitPriceCents: test.priceCents,
     turnaroundDaysAtOrder: test.turnaroundDays,
-  }))
+  }));
 
-  const totalCents = orderItems.length > 0 ? calcTotal(orderItems) : 0
-  const estimatedReadyAt = orderItems.length > 0 ? calcEta(new Date(), orderItems) : null
+  const totalCents = orderItems.length > 0 ? calcTotal(orderItems) : 0;
+  const estimatedReadyAt = orderItems.length > 0 ? calcEta(new Date(), orderItems) : null;
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!selectedPatientId) {
       toast({
         title: "Error",
         description: "Please select a patient",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (selectedTests.size === 0) {
@@ -122,15 +69,30 @@ export function OrderForm() {
         title: "Error",
         description: "Please select at least one test",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    createOrder.mutate({
-      patientId: selectedPatientId,
-      items: orderItems,
-    })
-  }
+    createOrderMutation.mutate(
+      { patientId: selectedPatientId, items: orderItems },
+      {
+        onSuccess: (data) => {
+          toast({
+            title: "Success",
+            description: "Order created successfully",
+          });
+          router.push(`/orders/${data.id}`);
+        },
+        onError: (error: Error) => {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
 
   return (
     <Card className="rounded-3xl shadow-lg">
@@ -149,7 +111,7 @@ export function OrderForm() {
               <SelectContent>
                 {patients.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
-                    {patient.name}
+                    {patient.fullName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -170,11 +132,14 @@ export function OrderForm() {
                       onCheckedChange={() => handleTestToggle(test.id)}
                     />
                     <div className="flex-1">
-                      <label htmlFor={test.id} className="text-sm font-medium leading-none cursor-pointer">
+                      <label
+                        htmlFor={test.id}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
                         {test.code} - {test.name}
                       </label>
                       <p className="text-sm text-muted-foreground">
-                        ${(test.priceCents / 100).toFixed(2)} • {test.turnaroundDays} days
+                        {formatMoney(test.priceCents)} • {test.turnaroundDays} days
                       </p>
                     </div>
                   </div>
@@ -187,7 +152,7 @@ export function OrderForm() {
             <div className="rounded-xl bg-slate-50 p-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total Cost:</span>
-                <span className="font-semibold">${(totalCents / 100).toFixed(2)}</span>
+                <span className="font-semibold">{formatMoney(totalCents)}</span>
               </div>
               {estimatedReadyAt && (
                 <div className="flex justify-between text-sm">
@@ -198,11 +163,15 @@ export function OrderForm() {
             </div>
           )}
 
-          <Button type="submit" disabled={createOrder.isPending} className="w-full rounded-xl">
-            {createOrder.isPending ? "Creating..." : "Create Order"}
+          <Button
+            type="submit"
+            disabled={createOrderMutation.isPending}
+            className="w-full rounded-xl"
+          >
+            {createOrderMutation.isPending ? "Creating..." : "Create Order"}
           </Button>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

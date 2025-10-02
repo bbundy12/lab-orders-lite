@@ -1,17 +1,17 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { patientSchema } from "@/lib/validation/patient"
-import { ZodError } from "zod"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { patientSchema } from "@/lib/validation/patient";
+import { ZodError } from "zod";
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const search = searchParams.get("search") || ""
+    const searchParams = request.nextUrl.searchParams;
+    const search = searchParams.get("search") || "";
 
     const patients = await prisma.patient.findMany({
       where: search
         ? {
-            name: {
+            fullName: {
               contains: search,
               mode: "insensitive",
             },
@@ -20,30 +20,30 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: "desc",
       },
-    })
+    });
 
-    return NextResponse.json(patients)
+    return NextResponse.json(patients);
   } catch (error) {
-    console.error("[v0] Error fetching patients:", error)
-    return NextResponse.json({ error: "Failed to fetch patients" }, { status: 500 })
+    console.error("[v0] Error fetching patients:", error);
+    return NextResponse.json({ error: "Failed to fetch patients" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const validated = patientSchema.parse(body)
+    const body = await request.json();
+    const validated = patientSchema.parse(body);
 
     const patient = await prisma.patient.create({
       data: {
-        name: validated.name,
-        dateOfBirth: new Date(validated.dateOfBirth),
-        phone: validated.phone || null,
+        fullName: validated.fullName,
+        dob: new Date(validated.dob),
         email: validated.email || null,
+        phone: validated.phone || null,
       },
-    })
+    });
 
-    return NextResponse.json(patient, { status: 201 })
+    return NextResponse.json(patient, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
             message: e.message,
           })),
         },
-        { status: 400 },
-      )
+        { status: 400 }
+      );
     }
-    console.error("[v0] Error creating patient:", error)
-    return NextResponse.json({ error: "Failed to create patient" }, { status: 500 })
+    console.error("[v0] Error creating patient:", error);
+    return NextResponse.json({ error: "Failed to create patient" }, { status: 500 });
   }
 }

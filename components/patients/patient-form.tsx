@@ -1,63 +1,44 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
-import type { PatientInput } from "@/lib/validation/patient"
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useCreatePatient } from "@/hooks/use-patients";
 
 export function PatientForm() {
-  const [formData, setFormData] = useState<PatientInput>({
-    name: "",
-    dateOfBirth: "",
+  const [formData, setFormData] = useState({
+    fullName: "",
+    dob: "",
     phone: "",
     email: "",
-  })
+  });
 
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-
-  const createPatient = useMutation({
-    mutationFn: async (data: PatientInput) => {
-      const response = await fetch("/api/patients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to create patient")
-      }
-
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["patients"] })
-      toast({
-        title: "Success",
-        description: "Patient created successfully",
-      })
-      setFormData({ name: "", dateOfBirth: "", phone: "", email: "" })
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      })
-    },
-  })
+  const { toast } = useToast();
+  const createPatientMutation = useCreatePatient();
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    createPatient.mutate(formData)
-  }
+    e.preventDefault();
+    createPatientMutation.mutate(formData, {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Patient created successfully",
+        });
+        setFormData({ fullName: "", dob: "", phone: "", email: "" });
+      },
+      onError: (error: Error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+  };
 
   return (
     <Card className="rounded-3xl shadow-lg">
@@ -68,11 +49,11 @@ export function PatientForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="fullName">Full Name</Label>
             <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              id="fullName"
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               placeholder="John Doe"
               required
               className="rounded-xl"
@@ -80,12 +61,12 @@ export function PatientForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+            <Label htmlFor="dob">Date of Birth</Label>
             <Input
-              id="dateOfBirth"
+              id="dob"
               type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+              value={formData.dob}
+              onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
               required
               className="rounded-xl"
             />
@@ -98,7 +79,7 @@ export function PatientForm() {
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="555-0123"
+              placeholder="(555) 123-4567"
               className="rounded-xl"
             />
           </div>
@@ -115,11 +96,15 @@ export function PatientForm() {
             />
           </div>
 
-          <Button type="submit" disabled={createPatient.isPending} className="w-full rounded-xl">
-            {createPatient.isPending ? "Creating..." : "Create Patient"}
+          <Button
+            type="submit"
+            disabled={createPatientMutation.isPending}
+            className="w-full rounded-xl"
+          >
+            {createPatientMutation.isPending ? "Creating..." : "Create Patient"}
           </Button>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

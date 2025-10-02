@@ -1,19 +1,12 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { updateOrderStatusSchema } from "@/lib/validation/order"
-import { ZodError } from "zod"
-
-const VALID_TRANSITIONS: Record<string, string[]> = {
-  DRAFT: ["SUBMITTED", "CANCELLED"],
-  SUBMITTED: ["IN_PROGRESS", "CANCELLED"],
-  IN_PROGRESS: ["READY"],
-  READY: [],
-  CANCELLED: [],
-}
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { ZodError, z } from "zod";
+import { validationErrorResponse, serverErrorResponse, notFoundResponse } from "@/lib/http";
+import { updateOrderStatusSchema } from "@/lib/validation/order";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params
+    const { id } = await params;
 
     const order = await prisma.order.findUnique({
       where: { id },
@@ -21,72 +14,80 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         patient: true,
         items: {
           include: {
-            test: true,
+            labTest: true,
           },
         },
       },
-    })
+    });
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+      return notFoundResponse("Order not found");
     }
 
-    return NextResponse.json(order)
+    return NextResponse.json(order);
   } catch (error) {
-    console.error("[v0] Error fetching order:", error)
-    return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 })
+    console.error("[v0] Error fetching order:", error);
+    return serverErrorResponse("Failed to fetch order");
   }
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params
-    const body = await request.json()
-    const validated = updateOrderStatusSchema.parse(body)
+    const { id } = await params;
+    const body = await request.json();
+    const validated = updateOrderStatusSchema.parse(body);
 
-    const currentOrder = await prisma.order.findUnique({
+    // First check if order exists
+    const existingOrder = await prisma.order.findUnique({
       where: { id },
-    })
+      select: { status: true },
+    });
 
-    if (!currentOrder) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    if (!existingOrder) {
+      return notFoundResponse("Order not found");
     }
 
-    const allowedTransitions = VALID_TRANSITIONS[currentOrder.status]
-    if (!allowedTransitions.includes(validated.status)) {
+    // Validate status transition
+    const validTransitions = {
+      DRAFT: ["SUBMITTED", "CANCELLED"],
+      SUBMITTED: ["IN_PROGRESS", "CANCELLED"],
+      IN_PROGRESS: ["READY"],
+      READY: [], // No transitions allowed from READY
+      CANCELLED: [], // No transitions allowed from CANCELLED
+    };
+
+    const currentStatus = existingOrder.status;
+    const newStatus = validated.status;
+
+    if (!validTransitions[currentStatus].includes(newStatus)) {
       return NextResponse.json(
-        { error: `Cannot transition from ${currentOrder.status} to ${validated.status}` },
-        { status: 400 },
-      )
+        {
+          error: `Invalid status transition from ${currentStatus} to ${newStatus}`,
+          validTransitions: validTransitions[currentStatus],
+        },
+        { status: 400 }
+      );
     }
 
     const order = await prisma.order.update({
       where: { id },
-      data: { status: validated.status },
+      data: { status: newStatus },
       include: {
         patient: true,
         items: {
           include: {
-            test: true,
+            labTest: true,
           },
         },
       },
-    })
+    });
 
-    return NextResponse.json(order)
+    return NextResponse.json(order);
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          errors: error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
-        },
-        { status: 400 },
-      )
+      return validationErrorResponse(error);
     }
-    console.error("[v0] Error updating order:", error)
-    return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
+    console.error("[v0] Error updating order:", error);
+    return serverErrorResponse("Failed to update order");
   }
 }

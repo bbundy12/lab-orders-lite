@@ -1,49 +1,41 @@
-"use client"
+"use client";
 
-import { useQuery } from "@tanstack/react-query"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState } from "react"
-import { formatDate } from "@/lib/date"
-import { OrderStatusBadge } from "./order-status-badge"
-import { Search } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-
-interface Order {
-  id: string
-  status: "DRAFT" | "SUBMITTED" | "IN_PROGRESS" | "READY" | "CANCELLED"
-  totalCents: number
-  placedAt: string
-  estimatedReadyAt: string | null
-  patient: {
-    name: string
-  }
-  items: Array<{
-    test: {
-      code: string
-    }
-  }>
-}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
+import { formatDate } from "@/lib/date";
+import { OrderStatusBadge } from "./order-status-badge";
+import { Search } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useOrders } from "@/hooks/use-orders";
+import { formatMoney } from "@/lib/calculations";
 
 export function OrdersTable() {
-  const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: orders = [], isLoading } = useQuery<Order[]>({
-    queryKey: ["orders", search, statusFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (search) params.set("q", search)
-      if (statusFilter !== "all") params.set("status", statusFilter)
+  const filters = {
+    ...(search && { q: search }),
+    ...(statusFilter !== "all" && { status: statusFilter }),
+  };
 
-      const response = await fetch(`/api/orders?${params}`)
-      if (!response.ok) throw new Error("Failed to fetch orders")
-      return response.json()
-    },
-  })
+  const { data: orders = [], isLoading } = useOrders(filters);
 
   return (
     <Card className="rounded-3xl shadow-lg">
@@ -101,15 +93,17 @@ export function OrdersTable() {
               <TableBody>
                 {orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.patient.name}</TableCell>
+                    <TableCell className="font-medium">{order.patient.fullName}</TableCell>
                     <TableCell className="font-mono text-sm">
-                      {order.items.map((item) => item.test.code).join(", ")}
+                      {order.items.map((item) => item.labTest.code).join(", ")}
                     </TableCell>
-                    <TableCell>${(order.totalCents / 100).toFixed(2)}</TableCell>
+                    <TableCell>{formatMoney(order.totalCents)}</TableCell>
                     <TableCell>
                       <OrderStatusBadge status={order.status} />
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(order.placedAt)}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(order.placedAt)}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {order.estimatedReadyAt ? formatDate(order.estimatedReadyAt) : "—"}
                     </TableCell>
@@ -128,5 +122,5 @@ export function OrdersTable() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

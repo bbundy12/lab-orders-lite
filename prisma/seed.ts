@@ -1,33 +1,33 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database...")
+  console.log("Seeding database...");
 
   // Create patients
   const patient1 = await prisma.patient.create({
     data: {
-      name: "Sarah Johnson",
-      dateOfBirth: new Date("1985-06-15"),
-      phone: "555-0123",
+      fullName: "Sarah Johnson",
+      dob: new Date("1985-06-15"),
+      phone: "(555) 123-4567",
       email: "sarah.j@example.com",
     },
-  })
+  });
 
   const patient2 = await prisma.patient.create({
     data: {
-      name: "Michael Chen",
-      dateOfBirth: new Date("1992-03-22"),
-      phone: "555-0456",
+      fullName: "Michael Chen",
+      dob: new Date("1992-03-22"),
+      phone: "(555) 987-6543",
       email: "mchen@example.com",
     },
-  })
+  });
 
-  console.log("Created patients:", patient1.name, patient2.name)
+  console.log("Created patients:", patient1.fullName, patient2.fullName);
 
   // Create lab tests
-  const test1 = await prisma.test.create({
+  const test1 = await prisma.labTest.create({
     data: {
       code: "CBC",
       name: "Complete Blood Count",
@@ -35,9 +35,9 @@ async function main() {
       turnaroundDays: 2,
       isActive: true,
     },
-  })
+  });
 
-  const test2 = await prisma.test.create({
+  const test2 = await prisma.labTest.create({
     data: {
       code: "LIPID",
       name: "Lipid Panel",
@@ -45,9 +45,9 @@ async function main() {
       turnaroundDays: 3,
       isActive: true,
     },
-  })
+  });
 
-  const test3 = await prisma.test.create({
+  const test3 = await prisma.labTest.create({
     data: {
       code: "TSH",
       name: "Thyroid Stimulating Hormone",
@@ -55,18 +55,18 @@ async function main() {
       turnaroundDays: 4,
       isActive: true,
     },
-  })
+  });
 
-  console.log("Created tests:", test1.code, test2.code, test3.code)
+  console.log("Created tests:", test1.code, test2.code, test3.code);
 
-  console.log("Seeding complete!")
+  console.log("Seeding complete!");
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
