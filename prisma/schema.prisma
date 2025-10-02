@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id        String   @id @default(cuid())
+  name      String
+  dateOfBirth DateTime
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders    Order[]
+  
+  @@index([name])
+}
+
+model Test {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  priceCents  Int
+  turnaroundDays Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orderItems  OrderItem[]
+  
+  @@index([code])
+  @@index([isActive])
+}
+
+enum OrderStatus {
+  DRAFT
+  SUBMITTED
+  IN_PROGRESS
+  READY
+  CANCELLED
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  patientId         String
+  status            OrderStatus @default(DRAFT)
+  totalCents        Int
+  placedAt          DateTime    @default(now())
+  estimatedReadyAt  DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  patient           Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items             OrderItem[]
+  
+  @@index([patientId])
+  @@index([status])
+  @@index([placedAt])
+}
+
+model OrderItem {
+  id                      String   @id @default(cuid())
+  orderId                 String
+  testId                  String
+  unitPriceCents          Int
+  turnaroundDaysAtOrder   Int
+  createdAt               DateTime @default(now())
+  
+  order                   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  test                    Test     @relation(fields: [testId], references: [id])
+  
+  @@index([orderId])
+  @@index([testId])
+}
