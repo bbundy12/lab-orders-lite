@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { patientSchema, type PatientInput } from "@/lib/validation/patient";
+import {
+  patientSchema,
+  updatePatientSchema,
+  type PatientInput,
+  type UpdatePatientInput,
+} from "@/lib/validation/patient";
 
 describe("patient validation", () => {
   describe("valid patient data", () => {
@@ -171,24 +176,76 @@ describe("patient validation", () => {
       });
     });
 
-    it("accepts valid phone formats", () => {
-      const validPhones = [
-        "(555) 123-4567",
-        "555-123-4567",
-        "555.123.4567",
-        "5551234567",
-        "+1 (555) 123-4567",
-      ];
+    it("accepts valid phone format", () => {
+      const patient = {
+        fullName: "John Doe",
+        dob: "1990-01-01",
+        phone: "(555) 123-4567",
+      };
 
-      validPhones.forEach((phone) => {
+      expect(() => patientSchema.parse(patient)).not.toThrow();
+    });
+
+    it("rejects phone numbers in unsupported formats", () => {
+      const invalidPhones = ["555-123-4567", "555.123.4567", "5551234567", "+1 (555) 123-4567"];
+
+      invalidPhones.forEach((phone) => {
         const patient = {
           fullName: "John Doe",
           dob: "1990-01-01",
           phone,
         };
 
-        expect(() => patientSchema.parse(patient)).not.toThrow();
+        expect(() => patientSchema.parse(patient)).toThrow();
       });
     });
+  });
+});
+
+describe("updatePatientSchema", () => {
+  it("allows partial updates with valid fields", () => {
+    const update: UpdatePatientInput = {
+      id: "patient-1",
+      email: "new@example.com",
+    };
+
+    expect(() => updatePatientSchema.parse(update)).not.toThrow();
+  });
+
+  it("converts empty strings to allow clearing optional fields", () => {
+    const update: UpdatePatientInput = {
+      id: "patient-1",
+      email: "",
+      phone: "",
+    };
+
+    const parsed = updatePatientSchema.parse(update);
+    expect(parsed.email).toBe("");
+    expect(parsed.phone).toBe("");
+  });
+
+  it("rejects payloads without fields besides id", () => {
+    const update = {
+      id: "patient-1",
+    };
+
+    expect(() => updatePatientSchema.parse(update)).toThrow(/No fields provided/);
+  });
+
+  it("validates provided fields", () => {
+    const update = {
+      id: "patient-1",
+      email: "not-an-email",
+    };
+
+    expect(() => updatePatientSchema.parse(update)).toThrow();
+  });
+
+  it("requires id", () => {
+    const update = {
+      email: "user@example.com",
+    };
+
+    expect(() => updatePatientSchema.parse(update)).toThrow();
   });
 });

@@ -74,10 +74,16 @@ describe("order validation", () => {
 
   describe("updateOrderStatusSchema", () => {
     it("accepts valid status updates", () => {
-      const validStatuses = ["DRAFT", "SUBMITTED", "IN_PROGRESS", "READY", "CANCELLED"];
+      const validStatuses: UpdateOrderStatusInput["status"][] = [
+        "DRAFT",
+        "SUBMITTED",
+        "IN_PROGRESS",
+        "READY",
+        "CANCELLED",
+      ];
 
       validStatuses.forEach((status) => {
-        const validUpdate = { status };
+        const validUpdate: UpdateOrderStatusInput = { status };
         expect(() => updateOrderStatusSchema.parse(validUpdate)).not.toThrow();
       });
     });
@@ -85,6 +91,10 @@ describe("order validation", () => {
     it("rejects invalid status values", () => {
       const invalidUpdate = { status: "INVALID_STATUS" };
       expect(() => updateOrderStatusSchema.parse(invalidUpdate)).toThrow();
+    });
+
+    it("rejects missing status field", () => {
+      expect(() => updateOrderStatusSchema.parse({} as UpdateOrderStatusInput)).toThrow();
     });
   });
 });

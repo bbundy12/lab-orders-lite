@@ -9,7 +9,8 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     globals: true,
     coverage: {
-      provider: "v8",
+      provider: "istanbul",
+      all: true,
       reporter: ["text", "json", "html"],
       include: ["lib/**/*.{ts,tsx}", "app/api/**/*.{ts,tsx}", "hooks/**/*.{ts,tsx}"],
       exclude: ["node_modules/**", "**/*.d.ts", "**/*.test.ts", "**/*.test.tsx", "prisma/**"],

@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/33</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>0/2</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/33</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
@@ -96,72 +96,72 @@
 <a name='L31'></a><a href='#L31'>31</a>
 <a name='L32'></a><a href='#L32'>32</a>
 <a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L34'></a><a href='#L34'>34</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { type NextRequest } from "next/server";</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { prisma } from "@/lib/prisma";</span>
-<span class="cstat-no" title="statement not covered" >import { ZodError, z } from "zod";</span>
-<span class="cstat-no" title="statement not covered" >import { validationErrorResponse, serverErrorResponse } from "@/lib/http";</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const updateLabTestSchema = z.object({</span>
-<span class="cstat-no" title="statement not covered" >  code: z.string().min(1).max(20).optional(),</span>
-<span class="cstat-no" title="statement not covered" >  name: z.string().min(1).max(200).optional(),</span>
-<span class="cstat-no" title="statement not covered" >  priceCents: z.number().int().min(0).optional(),</span>
-<span class="cstat-no" title="statement not covered" >  turnaroundDays: z.number().int().min(1).optional(),</span>
-<span class="cstat-no" title="statement not covered" >  isActive: z.boolean().optional(),</span>
-<span class="cstat-no" title="statement not covered" >});</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export async function PATCH(request: NextRequest, { params }: { params: Promise&lt;{ id: string }&gt; }) {</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { ZodError, z } from "zod";
+import { validationErrorResponse, serverErrorResponse } from "@/lib/http";
+&nbsp;
+const updateLabTestSchema = <span class="cstat-no" title="statement not covered" >z.object({</span>
+  code: z.string().min(1).max(20).optional(),
+  name: z.string().min(1).max(200).optional(),
+  priceCents: z.number().int().min(0).optional(),
+  turnaroundDays: z.number().int().min(1).optional(),
+  isActive: z.boolean().optional(),
+});
+&nbsp;
+export async function <span class="fstat-no" title="function not covered" >PATCH(r</span>equest: NextRequest, { params }: { params: Promise&lt;{ id: string }&gt; }) {
 <span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    const { id } = await params;</span>
-<span class="cstat-no" title="statement not covered" >    const body = await request.json();</span>
-<span class="cstat-no" title="statement not covered" >    const validated = updateLabTestSchema.parse(body);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const labTest = await prisma.labTest.update({</span>
-<span class="cstat-no" title="statement not covered" >      where: { id },</span>
-<span class="cstat-no" title="statement not covered" >      data: validated,</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
-<span class="cstat-no" title="statement not covered" ></span>
+    const { id } = <span class="cstat-no" title="statement not covered" >await params;</span>
+    const body = <span class="cstat-no" title="statement not covered" >await request.json();</span>
+    const validated = <span class="cstat-no" title="statement not covered" >updateLabTestSchema.parse(body);</span>
+&nbsp;
+    const labTest = <span class="cstat-no" title="statement not covered" >await prisma.labTest.update({</span>
+      where: { id },
+      data: validated,
+    });
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    return NextResponse.json(labTest);</span>
-<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+  } catch (error) {
 <span class="cstat-no" title="statement not covered" >    if (error instanceof ZodError) {</span>
 <span class="cstat-no" title="statement not covered" >      return validationErrorResponse(error);</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+    }
 <span class="cstat-no" title="statement not covered" >    console.error("[v0] Error updating lab test:", error);</span>
 <span class="cstat-no" title="statement not covered" >    return serverErrorResponse("Failed to update lab test");</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+  }
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -169,7 +169,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-02T19:39:15.210Z
+                at 2025-10-03T03:10:29.803Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
