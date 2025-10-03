@@ -37,16 +37,18 @@ export default function HomePage() {
             </div>
 
             {/* Right: Modern lab image */}
-            <div className="lg:w-1/2 lg:absolute lg:right-0 lg:top-0 lg:bottom-0">
-              <div className="h-full min-h-[400px] lg:min-h-[600px] bg-white flex items-center justify-center lg:justify-end">
-                <Image
-                  src="/medical-professional-with-clipboard-and-lab-equipm.jpg"
-                  alt="Modern lab environment"
-                  width={1600}
-                  height={900}
-                  className="w-full h-full object-contain object-center lg:object-right"
-                  priority
-                />
+            <div className="lg:w-1/2 px-6 pb-20 lg:pb-0 lg:px-0">
+              <div className="relative h-full min-h-[400px] lg:min-h-[600px] flex items-center justify-center lg:justify-end">
+                <div className="rounded-3xl border-4 border-blue-200 shadow-lg overflow-hidden max-w-2xl w-full">
+                  <Image
+                    src="/medical-professional-with-clipboard-and-lab-equipm.jpg"
+                    alt="Modern lab environment"
+                    width={1600}
+                    height={900}
+                    className="w-full h-full object-cover object-center lg:object-right"
+                    priority
+                  />
+                </div>
               </div>
             </div>
           </div>
