@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    command: pnpm test:integration
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://lab:lab@postgres:5432/laborderslite
+      SHADOW_DATABASE_URL: postgresql://lab:lab@postgres:5432/laborderslite_shadow
+      NODE_ENV: test
+      PRISMA_CLIENT_LOG_LEVEL: query
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d laborderslite"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

@@ -138,7 +138,7 @@ curl -X GET "http://localhost:3000/api/orders/ORDER_ID" | jq
 
 **Remaining Documentation Tasks:**
 
-- [ ] Add integration test for order creation snapshots
+- [x] Add integration tests for order workflows (API + status transitions) using shadow Postgres
 - [ ] Update README.md with:
   - [ ] Architecture overview
   - [ ] API documentation
