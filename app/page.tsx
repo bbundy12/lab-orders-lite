@@ -1,7 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { UserCircle, Beaker, ClipboardCheck, ArrowRight } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import Image from "next/image";
+import { UserCircle, Beaker, ClipboardCheck, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -38,10 +39,13 @@ export default function HomePage() {
             {/* Right: Modern lab image */}
             <div className="lg:w-1/2 lg:absolute lg:right-0 lg:top-0 lg:bottom-0">
               <div className="h-full min-h-[400px] lg:min-h-[600px] bg-white flex items-center justify-center lg:justify-end">
-                <img
+                <Image
                   src="/medical-professional-with-clipboard-and-lab-equipm.jpg"
                   alt="Modern lab environment"
+                  width={1600}
+                  height={900}
                   className="w-full h-full object-contain object-center lg:object-right"
+                  priority
                 />
               </div>
             </div>
@@ -53,7 +57,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">Key Features</h2>
-            <p className="text-lg text-slate-600">Everything you need to manage lab orders efficiently</p>
+            <p className="text-lg text-slate-600">
+              Everything you need to manage lab orders efficiently
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -69,7 +75,10 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <Link href="/patients">
-                  <Button variant="outline" className="w-full rounded-xl border-2 hover:bg-slate-50 bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl border-2 hover:bg-slate-50 bg-transparent"
+                  >
                     Manage Patients
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -89,7 +98,10 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <Link href="/tests">
-                  <Button variant="outline" className="w-full rounded-xl border-2 hover:bg-slate-50 bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl border-2 hover:bg-slate-50 bg-transparent"
+                  >
                     View Tests
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -109,7 +121,10 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <Link href="/orders">
-                  <Button variant="outline" className="w-full rounded-xl border-2 hover:bg-slate-50 bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl border-2 hover:bg-slate-50 bg-transparent"
+                  >
                     View Orders
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -189,5 +204,5 @@ export default function HomePage() {
         </div>
       </footer>
     </main>
-  )
+  );
 }

@@ -1,6 +1,13 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,7 +51,9 @@ export function TestsTable() {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Loading tests...</div>
         ) : tests.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">No tests yet. Add your first test above.</div>
+          <div className="text-center py-8 text-muted-foreground">
+            No tests yet. Add your first test above.
+          </div>
         ) : (
           <div className="rounded-xl border overflow-hidden">
             <Table>
@@ -54,7 +63,7 @@ export function TestsTable() {
                   <TableHead>Name</TableHead>
                   <TableHead>Price</TableHead>
                   <TableHead>Turnaround</TableHead>
-                  <TableHead>Status</TableHeader>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -66,7 +75,10 @@ export function TestsTable() {
                     <TableCell>{formatMoney(test.priceCents)}</TableCell>
                     <TableCell>{test.turnaroundDays} days</TableCell>
                     <TableCell>
-                      <Badge variant={test.isActive ? "default" : "secondary"} className="rounded-lg">
+                      <Badge
+                        variant={test.isActive ? "default" : "secondary"}
+                        className="rounded-lg"
+                      >
                         {test.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>

@@ -1,17 +1,31 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useCreatePatient } from "@/hooks/use-patients";
 import { patientSchema, type PatientInput } from "@/lib/validation/patient";
 import { formatPhoneNumber } from "@/lib/phone-formatter";
+import type { Patient } from "@/hooks/use-patients";
+import type { UpdatePatientInput } from "@/lib/validation/patient";
 
-export function PatientForm() {
+interface PatientEditModalProps {
+  patient: Patient | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate: (updatedPatient: UpdatePatientInput) => Promise<void>;
+}
+
+export function PatientEditModal({ patient, open, onOpenChange, onUpdate }: PatientEditModalProps) {
   const [formData, setFormData] = useState<PatientInput>({
     fullName: "",
     dob: "",
@@ -20,9 +34,22 @@ export function PatientForm() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
-  const createPatientMutation = useCreatePatient();
+
+  // Populate form when patient data is available
+  useEffect(() => {
+    if (patient) {
+      setFormData({
+        fullName: patient.fullName,
+        dob: patient.dob.split("T")[0], // Convert to YYYY-MM-DD format for date input
+        phone: patient.phone || "",
+        email: patient.email || "",
+      });
+      setErrors({});
+    }
+  }, [patient]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value);
@@ -44,86 +71,65 @@ export function PatientForm() {
       }
     };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("=== PATIENT FORM SUBMISSION DEBUG ===");
-    console.log("Raw form data:", formData);
-    console.log("Form data types:", {
-      fullName: typeof formData.fullName,
-      dob: typeof formData.dob,
-      email: typeof formData.email,
-      phone: typeof formData.phone,
-    });
 
     // Clear previous errors
     setErrors({});
 
     try {
       // Validate form data
-      console.log("Attempting to validate with Zod...");
       const validatedData = patientSchema.parse(formData);
-      console.log("✅ Zod validation passed:", validatedData);
 
-      console.log("Calling createPatientMutation.mutate...");
-      createPatientMutation.mutate(validatedData, {
-        onSuccess: (data) => {
-          console.log("✅ Patient created successfully:", data);
-          toast({
-            title: "Success",
-            description: "Patient created successfully",
-          });
-          setFormData({ fullName: "", dob: "", phone: "", email: "" });
-          setErrors({});
-        },
-        onError: (error: Error) => {
-          console.error("❌ Patient creation failed:", error);
-          console.error("Error details:", {
-            message: error.message,
-            stack: error.stack,
-            name: error.name,
-          });
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        },
+      setIsLoading(true);
+      if (!patient?.id) {
+        throw new Error("Patient ID is missing");
+      }
+
+      await onUpdate({
+        id: patient.id,
+        ...validatedData,
       });
+
+      toast({
+        title: "Success",
+        description: "Patient updated successfully",
+      });
+
+      onOpenChange(false);
     } catch (error) {
-      console.error("❌ Zod validation failed:", error);
       if (error instanceof Error && error.name === "ZodError") {
         const validationErrors: Record<string, string> = {};
         // @ts-expect-error ZodError shape with errors property
         error.errors?.forEach((err: { path: string[]; message: string }) => {
-          console.error("Validation error:", err);
           validationErrors[err.path[0]] = err.message;
         });
-        console.error("Setting validation errors:", validationErrors);
         setErrors(validationErrors);
       } else {
-        console.error("Unknown error:", error);
         toast({
           title: "Error",
-          description: "Please check your input and try again",
+          description: error instanceof Error ? error.message : "Failed to update patient",
           variant: "destructive",
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Card className="rounded-3xl shadow-lg">
-      <CardHeader>
-        <CardTitle>Add New Patient</CardTitle>
-        <CardDescription>Enter patient information to create a new record</CardDescription>
-      </CardHeader>
-      <CardContent className="max-h-[600px] overflow-y-auto pr-2">
-        <form onSubmit={handleSubmit} className="space-y-4 pb-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit Patient</DialogTitle>
+          <DialogDescription>Update patient information below</DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="p-6 pt-0 space-y-4">
           <div className="space-y-1">
-            <Label htmlFor="fullName">Full Name *</Label>
+            <Label htmlFor="edit-fullName">Full Name *</Label>
             <Input
-              id="fullName"
+              id="edit-fullName"
               value={formData.fullName}
               onChange={handleFieldChange("fullName")}
               placeholder="John Doe"
@@ -135,9 +141,9 @@ export function PatientForm() {
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="dob">Date of Birth *</Label>
+            <Label htmlFor="edit-dob">Date of Birth *</Label>
             <Input
-              id="dob"
+              id="edit-dob"
               type="date"
               value={formData.dob}
               onChange={handleFieldChange("dob")}
@@ -147,9 +153,9 @@ export function PatientForm() {
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="phone">Phone Number *</Label>
+            <Label htmlFor="edit-phone">Phone Number *</Label>
             <Input
-              id="phone"
+              id="edit-phone"
               type="tel"
               value={formData.phone}
               onChange={handlePhoneChange}
@@ -161,9 +167,9 @@ export function PatientForm() {
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="edit-email">Email *</Label>
             <Input
-              id="email"
+              id="edit-email"
               type="email"
               value={formData.email}
               onChange={handleFieldChange("email")}
@@ -173,15 +179,22 @@ export function PatientForm() {
             {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
           </div>
 
-          <Button
-            type="submit"
-            disabled={createPatientMutation.isPending}
-            className="w-full rounded-xl"
-          >
-            {createPatientMutation.isPending ? "Creating..." : "Create Patient"}
-          </Button>
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 rounded-xl"
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading} className="flex-1 rounded-xl">
+              {isLoading ? "Updating..." : "Update Patient"}
+            </Button>
+          </div>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

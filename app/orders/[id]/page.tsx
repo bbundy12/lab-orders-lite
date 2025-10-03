@@ -16,9 +16,13 @@ import {
 } from "@/components/ui/table";
 import { useParams } from "next/navigation";
 import { useOrder, useUpdateOrderStatus } from "@/hooks/use-order";
+import type { UpdateOrderStatusInput } from "@/hooks/use-order";
 import { formatMoney } from "@/lib/calculations";
 
-const STATUS_TRANSITIONS: Record<string, Array<{ status: string; label: string }>> = {
+const STATUS_TRANSITIONS: Record<
+  UpdateOrderStatusInput["status"],
+  Array<{ status: UpdateOrderStatusInput["status"]; label: string }>
+> = {
   DRAFT: [
     { status: "SUBMITTED", label: "Submit Order" },
     { status: "CANCELLED", label: "Cancel" },
@@ -40,9 +44,9 @@ export default function OrderDetailPage() {
   const { data: order, isLoading, error } = useOrder(id);
   const updateStatusMutation = useUpdateOrderStatus();
 
-  const handleStatusUpdate = (newStatus: string) => {
+  const handleStatusUpdate = (newStatus: UpdateOrderStatusInput["status"]) => {
     updateStatusMutation.mutate(
-      { orderId: id, status: newStatus as any },
+      { orderId: id, status: newStatus },
       {
         onSuccess: () => {
           toast({
@@ -75,7 +79,7 @@ export default function OrderDetailPage() {
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Order Not Found</h1>
           <p className="text-muted-foreground mb-6">
-            The order you're looking for doesn't exist or has been deleted.
+            The order you&apos;re looking for doesn&apos;t exist or has been deleted.
           </p>
           <Link href="/orders">
             <Button className="rounded-xl">

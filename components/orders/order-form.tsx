@@ -20,6 +20,7 @@ import { calcTotal, calcEta, formatMoney } from "@/lib/calculations";
 import { usePatients } from "@/hooks/use-patients";
 import { useLabTests } from "@/hooks/use-tests";
 import { useCreateOrder } from "@/hooks/use-orders";
+import type { CreateOrderInput } from "@/hooks/use-orders";
 
 export function OrderForm() {
   const [selectedPatientId, setSelectedPatientId] = useState("");
@@ -73,25 +74,15 @@ export function OrderForm() {
       return;
     }
 
-    createOrderMutation.mutate(
-      { patientId: selectedPatientId, items: orderItems },
-      {
-        onSuccess: (data) => {
-          toast({
-            title: "Success",
-            description: "Order created successfully",
-          });
-          router.push(`/orders/${data.id}`);
-        },
-        onError: (error: Error) => {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        },
-      }
-    );
+    createOrderMutation
+      .mutate({ patientId: selectedPatientId, items: orderItems } as CreateOrderInput)
+      .then((data) => {
+        toast({ title: "Success", description: "Order created successfully" });
+        router.push(`/orders/${data.id}`);
+      })
+      .catch((error: Error) => {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      });
   };
 
   return (
@@ -163,12 +154,8 @@ export function OrderForm() {
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={createOrderMutation.isPending}
-            className="w-full rounded-xl"
-          >
-            {createOrderMutation.isPending ? "Creating..." : "Create Order"}
+          <Button type="submit" className="w-full rounded-xl">
+            Create Order
           </Button>
         </form>
       </CardContent>

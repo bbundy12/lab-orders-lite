@@ -54,7 +54,8 @@ describe("patient validation", () => {
       try {
         patientSchema.parse(invalidPatient);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("required");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("required");
       }
     });
 
@@ -77,7 +78,8 @@ describe("patient validation", () => {
       try {
         patientSchema.parse(invalidPatient);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("Invalid date format");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("Invalid date format");
       }
     });
 
@@ -93,7 +95,8 @@ describe("patient validation", () => {
       try {
         patientSchema.parse(invalidPatient);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("Invalid email");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("Invalid email");
       }
     });
 
@@ -108,7 +111,8 @@ describe("patient validation", () => {
       try {
         patientSchema.parse(invalidPatient);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("100");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("100");
       }
     });
 

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createOrderSchema } from "@/lib/validation/order";
 import { calcTotal, calcEta } from "@/lib/calculations";
 import { ZodError } from "zod";
+import type { OrderStatus } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     const orders = await prisma.order.findMany({
       where: {
-        ...(status && { status: status as any }),
+        ...(status && { status: status as OrderStatus }),
         ...(patientId && { patientId }),
         ...(search && {
           patient: {

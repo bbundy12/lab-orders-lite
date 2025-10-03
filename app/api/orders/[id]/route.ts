@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ZodError, z } from "zod";
+import { ZodError } from "zod";
+import type { OrderStatus } from "@prisma/client";
 import { validationErrorResponse, serverErrorResponse, notFoundResponse } from "@/lib/http";
 import { updateOrderStatusSchema } from "@/lib/validation/order";
 
@@ -48,7 +49,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // Validate status transition
-    const validTransitions = {
+    const validTransitions: Record<OrderStatus, ReadonlyArray<OrderStatus>> = {
       DRAFT: ["SUBMITTED", "CANCELLED"],
       SUBMITTED: ["IN_PROGRESS", "CANCELLED"],
       IN_PROGRESS: ["READY"],
@@ -57,7 +58,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     };
 
     const currentStatus = existingOrder.status;
-    const newStatus = validated.status;
+    const newStatus = validated.status as OrderStatus;
 
     if (!validTransitions[currentStatus].includes(newStatus)) {
       return NextResponse.json(

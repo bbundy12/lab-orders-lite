@@ -15,26 +15,55 @@ model Patient {
   phone     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
   orders    Order[]
-  
+
   @@index([fullName])
 }
 
 model LabTest {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
-  priceCents  Int
+  id             String      @id @default(cuid())
+  code           String      @unique
+  name           String
+  priceCents     Int
   turnaroundDays Int
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  orderItems  OrderItem[]
-  
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
+
   @@index([code])
   @@index([isActive])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  patientId        String
+  status           OrderStatus @default(DRAFT)
+  totalCents       Int
+  placedAt         DateTime    @default(now())
+  estimatedReadyAt DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  patient          Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items            OrderItem[]
+
+  @@index([patientId])
+  @@index([status])
+  @@index([placedAt])
+}
+
+model OrderItem {
+  id                    String   @id @default(cuid())
+  orderId               String
+  labTestId             String
+  unitPriceCents        Int
+  turnaroundDaysAtOrder Int
+  createdAt             DateTime @default(now())
+  labTest               LabTest  @relation(fields: [labTestId], references: [id])
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([labTestId])
 }
 
 enum OrderStatus {
@@ -43,37 +72,4 @@ enum OrderStatus {
   IN_PROGRESS
   READY
   CANCELLED
-}
-
-model Order {
-  id                String      @id @default(cuid())
-  patientId         String
-  status            OrderStatus @default(DRAFT)
-  totalCents        Int
-  placedAt          DateTime    @default(now())
-  estimatedReadyAt  DateTime?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  patient           Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  items             OrderItem[]
-  
-  @@index([patientId])
-  @@index([status])
-  @@index([placedAt])
-}
-
-model OrderItem {
-  id                      String   @id @default(cuid())
-  orderId                 String
-  labTestId               String
-  unitPriceCents          Int
-  turnaroundDaysAtOrder   Int
-  createdAt               DateTime @default(now())
-  
-  order                   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  labTest                 LabTest  @relation(fields: [labTestId], references: [id])
-  
-  @@index([orderId])
-  @@index([labTestId])
 }

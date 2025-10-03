@@ -23,6 +23,7 @@ describe("labTest validation", () => {
         name: "Lipid Panel",
         priceCents: 6500,
         turnaroundDays: 3,
+        isActive: true,
       };
 
       expect(() => labTestSchema.parse(labTestWithoutActive)).not.toThrow();
@@ -56,7 +57,8 @@ describe("labTest validation", () => {
       try {
         labTestSchema.parse(invalidLabTest);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("required");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("required");
       }
     });
 
@@ -84,7 +86,8 @@ describe("labTest validation", () => {
       try {
         labTestSchema.parse(invalidLabTest);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("positive");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("positive");
       }
     });
 
@@ -101,7 +104,8 @@ describe("labTest validation", () => {
       try {
         labTestSchema.parse(invalidLabTest);
       } catch (error) {
-        expect(error.errors?.[0]?.message).toContain("at least 1");
+        const e = error as { errors?: Array<{ message?: string }> };
+        expect(e.errors?.[0]?.message).toContain("at least 1");
       }
     });
 

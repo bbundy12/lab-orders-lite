@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "coverage",
+    "dist",
+    "out",
+    "**/*.config.ts",
+    "**/*.config.mts",
+    "**/*.config.mjs",
+    "**/*.config.cjs",
+    "vite.config.*",
+    "vitest.config.*",
+    "next.config.*",
+    "postcss.config.*",
+    "tailwind.config.*"
+  ]
+}
