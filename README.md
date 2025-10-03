@@ -66,7 +66,7 @@ The compose file provisions Postgres 16 with credentials that match `.env.exampl
    ```
 2. Copy the integration environment template and adjust credentials if needed:
    ```bash
-   cp test.integration.env .env.test
+   cp env.test.example .env.test
    ```
 3. Execute the suite:
    ```bash
@@ -117,10 +117,12 @@ If you prefer a local Postgres instance, set `DATABASE_URL` and `SHADOW_DATABASE
   - Search and filtering minimal, with no fuzzy matching or advanced filters.
   - Integration tests currently only cover the order routes; patients and tests are not yet included.
   - No audit log beyond the current order state.
+  - Editing and deleting lab tests or orders are not supported.
 - **Next steps**
   - Add authentication and role-based access control to better flush out the app. This could lead to patients having a portal they could view their history in.
   - Extend integration coverage and tests to include patients and tests.
   - Refine turnaround time logic to better handle business days and time zones.
+  - Add editing and deleting for labe tests and orders
   - Introduce an audit trail to capture historical changes so staff can see who updated an order and when.
   - Improve search and filtering for more flexible data exploration.
 
